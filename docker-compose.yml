@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-game}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-game_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-gamedb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # 5433 en el host para no chocar con un Postgres local
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+
+  api:
+    build:
+      context: ./server
+      target: dev
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      ASPNETCORE_ENVIRONMENT: Development
+      DOTNET_USE_POLLING_FILE_WATCHER: "1"
+      ConnectionStrings__Default: Host=db;Port=5432;Database=${POSTGRES_DB:-gamedb};Username=${POSTGRES_USER:-game};Password=${POSTGRES_PASSWORD:-game_dev_password}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5050:8080"
+    volumes:
+      - ./server:/src
+
+  client:
+    build:
+      context: ./client
+      target: dev
+    environment:
+      API_URL: http://api:8080
+    depends_on:
+      - api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

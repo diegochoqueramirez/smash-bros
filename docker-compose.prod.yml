@@ -1,0 +1,21 @@
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+# Sirve el build estático con Nginx (puerto 8080) y la API compilada en modo Release.
+services:
+  api:
+    build:
+      context: ./server
+      target: final
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DOTNET_USE_POLLING_FILE_WATCHER: ""
+    ports: !override []
+    volumes: !reset []
+
+  client:
+    build:
+      context: ./client
+      target: prod
+    environment: !reset {}
+    ports: !override
+      - "8080:80"
+    volumes: !reset []
