@@ -4,6 +4,8 @@ Pelea para 2 jugadores en el mismo teclado, estilo Smash Bros: cada golpe sube e
 y a mayor %, más lejos sale volando. Pierdes una vida al salir de la pantalla (3 vidas). El backend guarda
 los resultados y un ranking de victorias.
 
+> Especificación completa con criterios de aceptación: [`docs/spec.md`](docs/spec.md)
+
 ## Stack
 
 | Servicio | Tecnología | Puerto |
