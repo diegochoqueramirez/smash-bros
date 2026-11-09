@@ -56,7 +56,7 @@ Al iniciar, cada jugador escribe su nombre. Al terminar: **ENTER** revancha, **M
 ## Estructura
 
 ```
-client/   Phaser + Vite (escenas en src/scenes, constantes de controles en src/config.ts)
+client/   Phaser + Vite (escenas en src/scenes, sprites en src/sprites, controles en src/config.ts)
 server/   ASP.NET Core (Program.cs, Models.cs)
 ```
 
@@ -65,7 +65,7 @@ constantes al inicio de `client/src/scenes/GameScene.ts`.
 
 ## Siguientes pasos sugeridos
 
-- Sprites y animaciones (ahora los luchadores son rectángulos generados en `BootScene`).
+- Arte propio: los luchadores son pixel art generado por código (`client/src/sprites/fighterSprites.ts`, una pose por estado). Para usar spritesheets, reemplaza esas texturas/animaciones manteniendo los nombres `${id}-${pose}`.
 - Escudo/esquive, golpes aéreos laterales y "smash attacks" cargados, y más personajes con golpes distintos.
 - Más escenarios y música/efectos de sonido.
 - Migraciones de EF Core.

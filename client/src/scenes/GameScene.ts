@@ -13,6 +13,11 @@ const STOCKS = 3;
 const RESPAWN_MS = 1200;
 const INVULN_MS = 2000;
 
+/** Poner en true para ver las cajas de golpe (útil para ajustar alcance y daño). */
+const SHOW_HITBOXES = false;
+/** Tiempo extra que se mantiene la pose de golpe después de que termina la caja. */
+const ATTACK_RECOVERY_MS = 110;
+
 /** Mantener "abajo" este tiempo antes de atravesar una plataforma (así ↓ + golpe no te hace caer). */
 const DROP_HOLD_MS = 140;
 /** Tras atacar, no se atraviesan plataformas durante este tiempo. */
@@ -70,6 +75,9 @@ class Fighter extends Phaser.Physics.Arcade.Sprite {
   invulnerableUntil = 0;
   attackReadyAt = 0;
   lastAttackAt = -1000;
+  /** Pose del último golpe y hasta cuándo se muestra (golpe + un poco de recuperación). */
+  attackPose: MoveName = 'jab';
+  attackAnimUntil = 0;
   /** Instante en que empezó a mantenerse "abajo" (-1 si no está presionado). */
   downHeldSince = -1;
 
@@ -80,7 +88,7 @@ class Fighter extends Phaser.Physics.Arcade.Sprite {
     readonly keys: FighterKeys,
     readonly spawnX: number,
   ) {
-    super(scene, spawnX, 200, id);
+    super(scene, spawnX, 200, `${id}-idle0`);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     (this.body as Body).setSize(28, 44);
@@ -116,6 +124,17 @@ class Fighter extends Phaser.Physics.Arcade.Sprite {
 
     if (body.velocity.y > MAX_FALL) body.setVelocityY(MAX_FALL);
     this.setFlipX(this.facing === -1);
+    this.animate(time, onGround);
+  }
+
+  /** Elige la animación según el estado: golpeado > golpe > aire > correr > reposo. */
+  private animate(time: number, onGround: boolean) {
+    let name: string = 'idle';
+    if (time < this.hitstunUntil) name = 'hurt';
+    else if (time < this.attackAnimUntil) name = this.attackPose;
+    else if (!onGround) name = 'jump';
+    else if (Math.abs((this.body as Body).velocity.x) > 40) name = 'run';
+    this.anims.play(`${this.id}-${name}`, true);
   }
 
   /** ¿Debe atravesar una plataforma atravesable? Solo si mantiene "abajo" y no acaba de atacar. */
@@ -278,11 +297,14 @@ export class GameScene extends Phaser.Scene {
 
   private tryAttack(f: Fighter, time: number) {
     if (time < f.attackReadyAt) return;
-    const move = MOVES[this.pickMove(f)];
+    const name = this.pickMove(f);
+    const move = MOVES[name];
     f.attackReadyAt = time + move.cooldown;
     f.lastAttackAt = time;
+    f.attackPose = name;
+    f.attackAnimUntil = time + move.activeMs + ATTACK_RECOVERY_MS;
 
-    const rect = this.add.rectangle(f.x, f.y, move.w, move.h, 0xffffff, 0.35);
+    const rect = this.add.rectangle(f.x, f.y, move.w, move.h, 0xffffff, SHOW_HITBOXES ? 0.35 : 0);
     this.hitboxes.push({ rect, owner: f, move, expires: time + move.activeMs, hit: new Set() });
   }
 

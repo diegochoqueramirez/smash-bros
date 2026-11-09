@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
+import { buildFighterTextures, createFighterAnims } from '../sprites/fighterSprites';
 
 /** Genera texturas simples por código para no depender de assets externos. */
 export class BootScene extends Phaser.Scene {
@@ -15,13 +16,10 @@ export class BootScene extends Phaser.Scene {
       g.destroy();
     };
 
-    // Luchadores: cuerpo de color + "ojo" a la derecha (se voltea con flipX al mirar a la izquierda).
+    // Luchadores: sprites de pixel art con una animación por estado (ver sprites/fighterSprites.ts).
     for (const id of ['p1', 'p2'] as const) {
-      make(id, 32, 44, (g) => {
-        g.fillStyle(COLORS[id], 1).fillRect(0, 0, 32, 44);
-        g.fillStyle(0xffffff, 1).fillRect(19, 8, 9, 9);
-        g.fillStyle(0x0f172a, 1).fillRect(24, 11, 4, 4);
-      });
+      buildFighterTextures(this, id, COLORS[id]);
+      createFighterAnims(this, id);
     }
 
     make('stage', 520, 36, (g) => {
