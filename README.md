@@ -22,6 +22,15 @@ docker compose down              # parar (los datos quedan en el volumen pgdata)
 docker compose down -v           # parar y borrar la base de datos
 ```
 
+### Modo local (solo Postgres en Docker)
+
+```bash
+./scripts/dev-local.sh           # db en Docker; API y cliente corren en tu máquina
+```
+
+Requiere SDK de .NET 9 y Node. API en http://localhost:5050, cliente en http://localhost:5173. Ctrl+C para todo.
+La base queda en `localhost:5433`; para pararla: `docker compose stop db`.
+
 Producción (Nginx + API en Release): `docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build` → http://localhost:8080
 
 > Si cambias el modelo de datos (`server/Models.cs`) con la base ya creada, usa `docker compose down -v`:
